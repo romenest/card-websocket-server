@@ -32,7 +32,7 @@ public class KafkaConsumerConfig {
     @Bean
     public ConsumerFactory<String, ChatMessage> consumerFactory() {
         Map<String, Object> config = new HashMap<>();
-        config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
+        config.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "192.168.2.10:9092");
         config.put(ConsumerConfig.GROUP_ID_CONFIG, "websocket-group");
         config.put(JsonDeserializer.TRUSTED_PACKAGES, "*");
 

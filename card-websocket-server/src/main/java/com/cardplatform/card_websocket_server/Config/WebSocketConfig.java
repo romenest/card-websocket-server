@@ -45,23 +45,32 @@ public class WebSocketConfig {
     }
 
     @Bean
-    public WebSocketHandler myHandler(KafkaTemplate<String, ChatMessage> kafkaTemplate) {
+    public WebSocketHandler myHandler(KafkaTemplate<String, com.cardplatform.card_websocket_server.DTO.ChatMessage> kafkaTemplate) {
         return session -> {
-            sessionManager.addSession(session);
             return session.receive()
                     .map(WebSocketMessage::getPayloadAsText)
                     .flatMap(msg -> {
                         try {
                             ChatMessage chatMessage = objectMapper.readValue(msg, ChatMessage.class);
-                            kafkaTemplate.send("test-topic", chatMessage);
-                            String responseMsg = "Echo: " + chatMessage.getMessage();
-                            return session.send(Mono.just(session.textMessage(responseMsg)));
+
+                            // 입장 메시지인지 확인하고, 그렇다면 카프카로 보내지 않고 세션 매니저로 직접 전달
+                            if (chatMessage.getMessage().contains("입장했습니다.")) {
+                                sessionManager.addSession(session, chatMessage.getRoomId(), chatMessage.getSender());
+                            } else {
+                                // 일반 채팅 메시지만 카프카로 전송
+                                kafkaTemplate.send("game-chat-topic", chatMessage);
+                            }
+
+                            return Mono.empty();
+
                         } catch (Exception e) {
                             System.err.println("JSON 파싱 오류: " + e.getMessage());
                             return Mono.error(e);
                         }
                     })
-                    .doFinally(signalType -> sessionManager.removeSession(session))
+                    .doFinally(signalType -> {
+                        sessionManager.removeSession(session);
+                    })
                     .then();
         };
     }

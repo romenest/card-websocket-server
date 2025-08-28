@@ -26,7 +26,7 @@ public class KafkaMessageListener {
             String jsonMessage = objectMapper.writeValueAsString(chatMessage);
 
             // 이제 sender를 추가하여 3개의 인자를 전달합니다.
-            sessionManager.broadcastToRoom(chatMessage);
+            sessionManager.broadcastToRoom(chatMessage.getRoomId(), chatMessage.getSender(), chatMessage.getMessage());
         } catch (JsonProcessingException e) {
             System.err.println("JSON 변환 오류: " + e.getMessage());
         }

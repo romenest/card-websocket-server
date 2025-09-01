@@ -21,14 +21,7 @@ public class KafkaMessageListener {
     @KafkaListener(topics = "game-chat-topic", groupId = "websocket-group", containerFactory = "kafkaListenerContainerFactory")
     public void listenAndBroadcast(ChatMessage chatMessage) {
         System.out.println("Kafka로부터 메시지 수신: " + chatMessage.getMessage());
-        try {
-            // chatMessage 객체를 JSON 문자열로 변환
-            String jsonMessage = objectMapper.writeValueAsString(chatMessage);
-
-            // 이제 sender를 추가하여 3개의 인자를 전달합니다.
-            sessionManager.broadcastToRoom(chatMessage.getRoomId(), chatMessage.getSender(), chatMessage.getMessage());
-        } catch (JsonProcessingException e) {
-            System.err.println("JSON 변환 오류: " + e.getMessage());
-        }
+        // chatMessage 객체를 그대로 broadcastToRoom으로 전달합니다.
+        sessionManager.broadcastToRoom(chatMessage);
     }
 }

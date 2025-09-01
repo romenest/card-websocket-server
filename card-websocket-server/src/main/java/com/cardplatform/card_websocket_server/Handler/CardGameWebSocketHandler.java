@@ -33,7 +33,7 @@ public class CardGameWebSocketHandler implements WebSocketHandler {
                     try {
                         ChatMessage chatMessage = objectMapper.readValue(msg, ChatMessage.class);
 
-                        if (chatMessage.getMessage().contains("입장했습니다.")) {
+                        if ("system".equals(chatMessage.getType()) && chatMessage.getMessage().contains("입장했습니다.")) {
                             sessionManager.addSession(session, chatMessage.getRoomId(), chatMessage.getSender());
                         } else {
                             kafkaTemplate.send("game-chat-topic", chatMessage);
